@@ -1,72 +1,116 @@
 # STM32 DC Motor Control using RC Joystick
 
-A real-time embedded systems project using STM32 to control the speed and direction of a DC motor using an RC transmitter and receiver.
-
-This project demonstrates PWM generation, Timer Input Capture, motor driver interfacing, and real-time motor control using STM32 HAL drivers and STM32CubeIDE.
+> STM32-based embedded motor control system using RC receiver input, PWM generation, Timer Input Capture, and TB6612 motor driver.
 
 ---
 
 # Project Overview
 
-The main objective of this project is to:
+This project implements real-time single-direction DC motor speed control using an STM32F407 Discovery board and RC joystick input.
 
-- Read PWM signals from an RC receiver
-- Control DC motor speed using PWM
-- Control motor direction using GPIO
-- Interface STM32 with the TB6612 motor driver
-- Implement real-time embedded motor control
+The STM32 reads PWM signals from the RC receiver using Timer Input Capture mode and generates PWM output signals to control the speed of a DC motor through the TB6612 motor driver.
 
-The joystick movement from the RC transmitter controls the motor speed and direction dynamically.
+This project demonstrates practical embedded systems concepts including:
+- PWM generation
+- Timer Input Capture
+- GPIO interfacing
+- Motor driver interfacing
+- Real-time embedded motor control using STM32 HAL
 
 ---
 
-# Components Used
+# Features
 
-- STM32 Development Board
-- TB6612 Motor Driver
-- RC Transmitter
-- RC Receiver
-- DC Motor
-- 12V DC Adapter
-- Jumper Wires
+- RC joystick-based motor speed control
+- PWM signal generation using STM32 timers
+- Timer Input Capture implementation
+- TB6612 motor driver interfacing
+- Real-time embedded motor control
+- STM32 HAL driver programming
+- STM32CubeIDE project structure
+- Single-direction PWM motor control
+
+---
+
+# Hardware Components
+
+| Component | Description |
+|---|---|
+| STM32F407VGTx Discovery Board | Main microcontroller |
+| TB6612 Motor Driver | DC motor driver |
+| RC Transmitter | User joystick control |
+| RC Receiver | PWM signal receiver |
+| DC Motor | Motor load |
+| 12V DC Adapter | Motor power supply |
+| Jumper Wires | Hardware connections |
 
 ---
 
 # System Block Diagram
 
-RC Transmitter → RC Receiver → STM32 → TB6612 Motor Driver → DC Motor
+```text
+RC Transmitter
+       ↓
+RC Receiver
+       ↓
+STM32F407 Discovery Board
+       ↓
+TB6612 Motor Driver
+       ↓
+DC Motor
+```
 
 ---
 
-# Hardware Connections
+# Exact Hardware Connections
 
 ## 1. RC Receiver to STM32
 
-| RC Receiver Pin | STM32 Pin | Description |
+| RC Receiver Pin | STM32 Pin | Peripheral Function |
 |---|---|---|
-| Signal | Timer Input Capture Pin | PWM signal from receiver |
-| VCC | 5V | Power supply |
-| GND | GND | Common ground |
+| Signal | PC6 | TIM3_CH1 Input Capture |
+| VCC | 5V | Power Supply |
+| GND | GND | Common Ground |
 
-The STM32 reads PWM pulse widths from the RC receiver using Timer Input Capture mode.
+### Description
+
+The RC receiver generates PWM pulses according to joystick movement.
+
+STM32 uses:
+- TIM3
+- Channel 1
+- Input Capture Interrupt Mode
+
+to measure pulse width from the RC receiver.
 
 ---
 
-## 2. STM32 to TB6612 Motor Driver
+# 2. STM32 to TB6612 Motor Driver
 
 | STM32 Pin | TB6612 Pin | Function |
 |---|---|---|
-| PWM Output Pin | PWMA | Motor speed control |
-| GPIO Output | AIN1 | Motor direction control |
-| GPIO Output | AIN2 | Motor direction control |
-| GPIO Output | STBY | Enable driver |
-| GND | GND | Common ground |
+| PA15 | PWMA | PWM Speed Control |
+| PB0 | AIN1 | Phase / Direction Control |
+| GND | GND | Common Ground |
 
-PWM is generated using STM32 timers to control motor speed.
+### Timer Mapping
+
+| STM32 Timer | Channel | Purpose |
+|---|---|---|
+| TIM2 | CH1 | PWM Generation |
+| TIM3 | CH1 | RC Input Capture |
+
+### Description
+
+STM32 generates PWM using:
+- TIM2
+- Channel 1
+
+The PWM duty cycle changes according to joystick position from the RC transmitter.
 
 ---
 
-## 3. TB6612 to DC Motor
+# 3. TB6612 to DC Motor
 
 | TB6612 Pin | Motor Connection |
 |---|---|
@@ -75,28 +119,68 @@ PWM is generated using STM32 timers to control motor speed.
 
 ---
 
-## 4. Power Supply Connections
+# 4. Power Supply Connections
 
-| Power Source | Connection |
+| Device | Supply |
 |---|---|
-| 12V DC Adapter | TB6612 VM Pin |
-| GND | Common Ground |
-| STM32 | USB / External 5V |
+| TB6612 VM | 12V DC Adapter |
+| STM32F407 Discovery | USB Power |
+| RC Receiver | 5V |
+| All GND Pins | Common Ground |
 
-### Important Notes
+---
+
+# Important Notes
 
 - All grounds must be connected together.
 - TB6612 motor supply is powered using a 12V DC adapter.
 - STM32 and RC receiver share common ground with the motor driver.
+- PWM output controls motor speed.
+- Current implementation supports single-direction motor control.
+- AIN2 and STBY pins are not controlled through STM32 GPIO in the current implementation.
 
 ---
 
-# STM32 Peripherals Used
+# STM32 Peripheral Configuration
 
-- GPIO
-- TIM PWM Mode
-- TIM Input Capture Mode
-- Interrupts
+| Peripheral | Purpose |
+|---|---|
+| TIM2 CH1 | PWM Generation |
+| TIM3 CH1 | Input Capture |
+| GPIO | Motor Control |
+| Interrupts | RC Signal Processing |
+
+---
+
+# Timer Configuration
+
+## TIM2 (PWM Generation)
+
+| Parameter | Value |
+|---|---|
+| Prescaler | 167 |
+| Period | 999 |
+| PWM Mode | PWM Mode 1 |
+
+### Purpose
+Used for:
+- Motor speed control
+- PWM generation to TB6612
+
+---
+
+## TIM3 (Input Capture)
+
+| Parameter | Value |
+|---|---|
+| Prescaler | 167 |
+| Period | 65535 |
+| Input Polarity | Both Edge |
+
+### Purpose
+Used for:
+- RC PWM signal measurement
+- Joystick pulse width calculation
 
 ---
 
@@ -111,23 +195,96 @@ PWM is generated using STM32 timers to control motor speed.
 
 # Working Principle
 
-1. The RC transmitter sends control signals.
-2. The RC receiver outputs PWM signals.
-3. STM32 measures pulse width using Timer Input Capture.
-4. Based on joystick position:
-   - Motor speed is controlled using PWM
-   - Motor direction is controlled using GPIO pins
-5. TB6612 drives the DC motor accordingly.
+1. RC transmitter sends joystick commands.
+2. RC receiver outputs PWM pulses.
+3. STM32 TIM3 Input Capture measures pulse width.
+4. Pulse width determines motor speed.
+5. TIM2 generates PWM output on PA15.
+6. TB6612 drives the DC motor according to PWM duty cycle.
 
 ---
 
-# Features
+# Project Structure
 
-- Real-time motor speed control
-- Direction control
-- PWM-based motor driving
-- RC joystick interface
-- STM32 timer applications
-- Embedded C implementation using HAL drivers
+```bash
+Core/
+├── Inc/
+└── Src/
+
+Drivers/
+
+MOTOR_CONTROL_PWM_JOYSTICK.ioc
+
+README.md
+```
+
+---
+
+# Applications
+
+- RC vehicle systems
+- Robotics
+- Embedded motor control
+- Industrial automation
+- Educational STM32 projects
+
+---
+
+# Learning Outcomes
+
+Through this project, I learned:
+
+- STM32 timer configuration
+- PWM generation
+- Timer Input Capture
+- Interrupt handling
+- Motor driver interfacing
+- Embedded C programming
+- STM32 HAL driver usage
+- Real-time embedded systems development
+
+---
+
+# Future Improvements
+
+- Bidirectional motor control
+- AIN2 and STBY GPIO integration
+- PID speed control
+- Encoder feedback integration
+- FreeRTOS integration
+- OLED display monitoring
+- Wireless telemetry
+
+---
+
+# Repository Description
+
+```text
+STM32-based DC motor speed control using RC joystick, PWM generation, Timer Input Capture, and TB6612 motor driver.
+```
+
+---
+
+# Recommended GitHub Topics
+
+```text
+stm32
+stm32f4
+embedded-systems
+motor-control
+pwm
+timer-input-capture
+embedded-c
+tb6612
+rc-control
+hal-drivers
+```
+
+---
+
+# Author
+
+## Om Manekar
+ECE Student | Embedded Systems Enthusiast
 
 ---
