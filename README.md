@@ -130,16 +130,6 @@ The PWM duty cycle changes according to joystick position from the RC transmitte
 
 ---
 
-# Important Notes
-
-- All grounds must be connected together.
-- TB6612 motor supply is powered using a 12V DC adapter.
-- STM32 and RC receiver share common ground with the motor driver.
-- PWM output controls motor speed.
-- Current implementation supports single-direction motor control.
-- AIN2 and STBY pins are not controlled through STM32 GPIO in the current implementation.
-
----
 
 # STM32 Peripheral Configuration
 
@@ -257,28 +247,6 @@ Through this project, I learned:
 
 ---
 
-# Repository Description
-
-```text
-STM32-based DC motor speed control using RC joystick, PWM generation, Timer Input Capture, and TB6612 motor driver.
-```
-
----
-
-# Recommended GitHub Topics
-
-```text
-stm32
-stm32f4
-embedded-systems
-motor-control
-pwm
-timer-input-capture
-embedded-c
-tb6612
-rc-control
-hal-drivers
-```
 
 ---
 
