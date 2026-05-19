@@ -247,12 +247,3 @@ Through this project, I learned:
 
 ---
 
-
----
-
-# Author
-
-## Om Manekar
-ECE Student | Embedded Systems Enthusiast
-
----
